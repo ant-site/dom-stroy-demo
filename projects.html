@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Проекты домов – {brand}</title>
+<meta name="description" content="Проекты каркасных, газобетонных и брусовых домов: фото, площадь, планировка, цена.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%23b4763a%27/%3E%3Cpath d=%27M6 17l10-9 10 9v9H6z%27 fill=%27%23fff%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<main class="wrap">
+  <div class="phead" data-in><span class="label">Проекты</span><h1>Проекты домов</h1><p class="lead">Выберите готовый проект или расскажите, что хотите, — доработаем планировку под вас.</p></div>
+  <div class="filters" id="filters" role="group" aria-label="Фильтр по материалу"></div>
+  <div id="list"></div>
+  <section class="sec--tight" style="text-align:center;padding-bottom:80px" data-in>
+    <h2>Не нашли подходящий?</h2><p class="lead" style="margin:14px auto 26px">Нарисуем индивидуальный проект под ваш участок и бюджет.</p>
+    <a class="btn btn--pulse" href="index.html#zayavka">Оставить заявку</a>
+  </section>
+</main>
+<div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Просмотр фото"><button class="lb-x" aria-label="Закрыть">×</button><button class="lb-p" aria-label="Назад">‹</button><img alt=""><button class="lb-n" aria-label="Вперёд">›</button></div>
+<script src="api-shim.js"></script><script src="site.js"></script>
+<script>
+SITE.ready.then(c => {
+  const list = document.getElementById('list'), fl = document.getElementById('filters');
+  const mats = ['Все', ...new Set(c.projects.map(p => p.material).filter(Boolean))];
+  let cur = 'Все';
+  fl.innerHTML = mats.map(m => `<button class="chip" aria-pressed="${m === cur}">${esc(m)}</button>`).join('');
+  fl.onclick = e => { const b = e.target.closest('.chip'); if (!b) return; cur = b.textContent; [...fl.children].forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); };
+
+  function draw() {
+    const ps = c.projects.filter(p => cur === 'Все' || p.material === cur);
+    list.innerHTML = ps.length ? ps.map(p => {
+      const ph = (p.photos || []).filter(Boolean);
+      return `<article class="proj" data-in data-id="${esc(p.id)}">
+        <div class="proj__ph" data-open="0">${ph[0] ? `<img src="${esc(ph[0])}" alt="${esc(p.title)}" loading="lazy">` : ''}
+          ${ph.length > 1 ? `<div class="proj__thumbs">${ph.map((u, i) => `<button type="button" data-i="${i}" aria-label="Фото ${i + 1}"${i ? '' : ' aria-current="true"'}><img src="${esc(u)}" alt=""></button>`).join('')}</div>` : ''}</div>
+        <div class="proj__body"><h2>${esc(p.title)}</h2><p>${esc(p.desc)}</p>
+          <div class="specs"><div><b>${esc(p.area)}</b><span>м²</span></div><div><b>${esc(p.floors)}</b><span>этаж.</span></div><div><b>${esc(p.bedrooms)}</b><span>спальни</span></div><div><b style="font-size:17px;padding-top:4px">${esc(p.material)}</b><span>материал</span></div></div>
+          <div class="proj__foot"><span class="price">${esc(p.price)}</span><a class="btn btn--sm" href="index.html#zayavka">Узнать подробнее</a></div></div></article>`;
+    }).join('') : '<p class="empty">Проектов в этой категории пока нет.</p>';
+    SITE.reveal(list);
+  }
+  draw();
+
+  // просмотр фото
+  const lb = document.getElementById('lb'), img = lb.querySelector('img'); let set = [], i = 0;
+  const show = n => { i = (n + set.length) % set.length; img.src = set[i]; };
+  const close = () => lb.classList.remove('open');
+  list.onclick = e => {
+    const art = e.target.closest('.proj'); if (!art) return;
+    const p = c.projects.find(x => x.id === art.dataset.id); const ph = (p.photos || []).filter(Boolean);
+    const t = e.target.closest('.proj__thumbs button');
+    if (t) { const n = +t.dataset.i; art.querySelector('.proj__ph > img').src = ph[n]; art.querySelectorAll('.proj__thumbs button').forEach(b => b.removeAttribute('aria-current')); t.setAttribute('aria-current', 'true'); art.dataset.cur = n; return; }
+    if (e.target.closest('.proj__ph')) { set = ph; show(+art.dataset.cur || 0); lb.classList.add('open'); lb.querySelector('.lb-x').focus(); }
+  };
+  lb.querySelector('.lb-x').onclick = close; lb.querySelector('.lb-p').onclick = () => show(i - 1); lb.querySelector('.lb-n').onclick = () => show(i + 1);
+  lb.onclick = e => { if (e.target === lb) close(); };
+  addEventListener('keydown', e => { if (!lb.classList.contains('open')) return; if (e.key === 'Escape') close(); if (e.key === 'ArrowLeft') show(i - 1); if (e.key === 'ArrowRight') show(i + 1); });
+});
+</script>
+</body>
+</html>

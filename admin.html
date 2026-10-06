@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Админ-панель сайта</title>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--a:#b4763a;--ink:#171a1d;--soft:#5d636b;--bg:#eef0f2;--line:#d9dde1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:Geologica,sans-serif;margin:0}h2{font-size:26px;margin-bottom:6px}h3{font-size:18px;margin-bottom:12px}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{border:0;background:var(--a);color:#fff;padding:12px 20px;border-radius:6px;font-weight:600;cursor:pointer;min-height:44px}
+.btn:hover{filter:brightness(1.08)}.btn.ghost{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}.btn.del{background:#fff;color:#a8281d;box-shadow:inset 0 0 0 2px #e8c4c0}
+.btn.sm{padding:6px 12px;min-height:34px;font-size:14px}.btn:disabled{opacity:.5;cursor:wait}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.login{max-width:380px;margin:12vh auto;background:#fff;padding:34px;border-radius:12px;box-shadow:0 12px 40px rgb(0 0 0/.12)}
+.login input{width:100%;padding:13px;border:2px solid var(--line);border-radius:6px;margin:16px 0}
+.top{position:sticky;top:0;z-index:20;background:#171a1d;color:#fff;display:flex;align-items:center;gap:14px;padding:10px 20px;flex-wrap:wrap}
+.top b{font-family:Geologica;font-size:18px}.top .sp{margin-left:auto}.top a{color:#e8b987}
+.dirty{font-size:14px;color:#e8b987}
+.layout{display:grid;grid-template-columns:210px 1fr;gap:0;max-width:1180px;margin:0 auto;min-height:calc(100vh - 60px)}
+.side{padding:20px 12px;position:sticky;top:60px;align-self:start}
+.side button{display:block;width:100%;text-align:left;padding:12px 14px;border:0;background:none;border-radius:6px;cursor:pointer;font-weight:500;margin-bottom:2px}
+.side button[aria-current=true]{background:#fff;font-weight:600;box-shadow:0 2px 8px rgb(0 0 0/.08)}
+.side .n{float:right;background:var(--a);color:#fff;border-radius:99px;font-size:12px;padding:1px 8px}
+main{padding:24px 20px 80px}
+.card{background:#fff;border-radius:10px;padding:22px;margin-bottom:18px;box-shadow:0 2px 10px rgb(0 0 0/.06)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid .full{grid-column:1/-1}
+label.f{display:block;font-size:14px;font-weight:600;color:var(--soft)}label.f input,label.f select,label.f textarea{display:block;width:100%;margin-top:5px;padding:10px 12px;border:2px solid var(--line);border-radius:6px;font-weight:400;color:var(--ink);background:#fff}
+label.f textarea{min-height:90px;resize:vertical}label.f input[type=color]{padding:2px;height:44px}
+.hint{color:var(--soft);font-size:14px;margin:0 0 14px}
+.photos{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+.ph{position:relative;width:120px;height:84px;border-radius:6px;overflow:hidden;background:#ddd;border:2px solid var(--line)}
+.ph img,.ph video{width:100%;height:100%;object-fit:cover}.ph button{position:absolute;top:3px;right:3px;width:26px;height:26px;border-radius:50%;border:0;background:rgb(0 0 0/.65);color:#fff;cursor:pointer}
+.ph .mv{top:auto;bottom:3px;right:auto;left:3px;width:auto;padding:0 8px;border-radius:99px;font-size:12px}
+.drop{border:2px dashed #b9bfc6;border-radius:8px;padding:16px;text-align:center;color:var(--soft);cursor:pointer;background:#fafbfb}
+.drop.over{border-color:var(--a);background:#fbf3ea}
+.item{border:2px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;background:#fcfcfc}
+.item__h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.bar{height:6px;background:#e1e4e7;border-radius:3px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:var(--a);width:0}
+.lead{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:10px;background:#fff}
+.lead small{color:var(--soft)}.lead b{font-size:17px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#171a1d;color:#fff;padding:12px 22px;border-radius:8px;z-index:50;opacity:0;pointer-events:none;transition:opacity .3s}.toast.on{opacity:1}
+table{width:100%;border-collapse:collapse}td{padding:4px 6px 4px 0}td input{width:100%;padding:8px 10px;border:2px solid var(--line);border-radius:6px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto;padding:8px}.side button{white-space:nowrap;width:auto}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div><div class="toast" id="toast" role="status"></div>
+<script src="api-shim.js"></script>
+<script>
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = (s, r = document) => r.querySelector(s);
+let C = null, tab = 'leads', dirty = false, leads = [], files = [];
+const toast = t => { const e = $('#toast'); e.textContent = t; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2600); };
+const api = async (url, opt = {}) => { const r = await fetch(url, opt); const j = await r.json().catch(() => ({})); if (r.status === 401 && url !== '/api/login') { boot(); throw new Error('Нужен вход'); } if (!r.ok) throw new Error(j.error || 'Ошибка'); return j; };
+const get = (o, p) => p.split('.').reduce((a, k) => a?.[k], o);
+const set = (o, p, v) => { const ks = p.split('.'), l = ks.pop(); ks.reduce((a, k) => a[k], o)[l] = v; };
+const mark = () => { dirty = true; const d = $('#dirty'); if (d) d.textContent = 'Есть несохранённые изменения'; };
+const uid = () => 'i' + Math.random().toString(36).slice(2, 8);
+
+async function boot() {
+  const me = await fetch('/api/me').then(r => r.json());
+  if (!me.admin) return loginView();
+  C = await fetch('/api/content').then(r => r.json());
+  leads = await api('/api/leads'); files = await api('/api/uploads');
+  view();
+}
+function loginView() {
+  $('#app').innerHTML = `<form class="login" id="lf"><h2>Вход в админ-панель</h2><p class="hint">Демо-пароль: <b>demo123</b> (в рабочей версии заменим на ваш).</p>
+    <input type="password" id="pw" placeholder="Пароль" autocomplete="current-password" autofocus aria-label="Пароль"><button class="btn" style="width:100%">Войти</button><p id="le" style="color:#a8281d"></p></form>`;
+  $('#lf').onsubmit = async e => { e.preventDefault(); try { await api('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: $('#pw').value }) }); boot(); } catch (x) { $('#le').textContent = x.message; } };
+}
+
+const TABS = [['leads', 'Заявки'], ['company', 'Компания и главная'], ['projects', 'Проекты домов'], ['videos', 'Видео'], ['cameras', 'Камеры'], ['calc', 'Калькулятор'], ['files', 'Файлы']];
+function view() {
+  $('#app').innerHTML = `<div class="top"><b>Админ-панель</b><span class="dirty" style="margin-left:6px">демо: изменения видны только в вашем браузере</span><a href="index.html" target="_blank">Открыть сайт ↗</a><span class="sp dirty" id="dirty"></span>
+    <button class="btn" id="save">Сохранить на сайте</button><button class="btn ghost sm" id="out">Выйти</button></div>
+    <div class="layout"><nav class="side" aria-label="Разделы">${TABS.map(([k, t]) => `<button data-t="${k}" aria-current="${k === tab}">${t}${k === 'leads' && leads.length ? `<span class="n">${leads.length}</span>` : ''}</button>`).join('')}</nav><main id="main"></main></div>`;
+  $('.side').onclick = e => { const b = e.target.closest('button'); if (b) { tab = b.dataset.t; view(); } };
+  $('#save').onclick = save; $('#out').onclick = async () => { await api('/api/logout', { method: 'POST' }); boot(); };
+  $('#main').innerHTML = ({ leads: vLeads, company: vCompany, projects: vProjects, videos: vVideos, cameras: vCameras, calc: vCalc, files: vFiles })[tab]();
+  bind(); if (dirty) mark();
+}
+async function save() { const b = $('#save'); b.disabled = true; try { await api('/api/content', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(C) }); dirty = false; $('#dirty').textContent = ''; toast('Сохранено — сайт обновлён'); } catch (e) { toast(e.message); } b.disabled = false; }
+
+// ---------- поля
+const F = (label, p, o = {}) => { const v = get(C, p) ?? ''; const t = o.type || 'text';
+  const inp = t === 'area' ? `<textarea data-p="${p}">${esc(v)}</textarea>` : t === 'select' ? `<select data-p="${p}">${o.opts.map(x => `<option${x === v ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select>` : `<input type="${t}" data-p="${p}" value="${esc(v)}"${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}>`;
+  return `<label class="f${o.full ? ' full' : ''}">${esc(label)}${inp}</label>`; };
+const mediaThumb = u => /\.(mp4|webm|mov)$/i.test(u) ? `<video src="${esc(u)}" muted></video>` : `<img src="${esc(u)}" alt="">`;
+// блок загрузки: data-up="путь к полю/массиву" data-mode="one|many"
+const Drop = (p, mode, accept = 'image/*') => `<div class="drop" tabindex="0" role="button" data-up="${p}" data-mode="${mode}" data-accept="${accept}">${mode === 'many' ? 'Нажмите или перетащите фото сюда' : 'Нажмите или перетащите файл сюда'}<div class="bar" hidden><i></i></div></div>`;
+
+function bind() {
+  const m = $('#main');
+  m.querySelectorAll('[data-p]').forEach(el => el.addEventListener('input', () => { let v = el.value; if (el.type === 'number') v = v === '' ? '' : +v; set(C, el.dataset.p, v); mark(); }));
+  m.querySelectorAll('.drop').forEach(d => {
+    const pick = files => upload(d, [...files]);
+    d.onclick = () => { const i = document.createElement('input'); i.type = 'file'; i.accept = d.dataset.accept; i.multiple = d.dataset.mode === 'many'; i.onchange = () => pick(i.files); i.click(); };
+    d.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); d.click(); } };
+    d.ondragover = e => { e.preventDefault(); d.classList.add('over'); }; d.ondragleave = () => d.classList.remove('over');
+    d.ondrop = e => { e.preventDefault(); d.classList.remove('over'); pick(e.dataTransfer.files); };
+  });
+  m.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b.dataset.a, b.dataset.b));
+}
+function upload1(file, bar) { return new Promise((ok, no) => { const x = new XMLHttpRequest(); x.open('POST', '/api/upload?name=' + encodeURIComponent(file.name));
+  x.upload.onprogress = e => { if (e.lengthComputable) bar.firstElementChild.style.width = (e.loaded / e.total * 100) + '%'; };
+  x.onload = () => { let j = {}; try { j = JSON.parse(x.responseText); } catch {} x.status === 200 ? ok(j.url) : no(new Error(j.error || 'Ошибка загрузки')); };
+  x.onerror = () => no(new Error('Нет связи с сервером')); x.send(file); }); }
+async function upload(d, list) {
+  if (!list.length) return; const bar = $('.bar', d); bar.hidden = false;
+  const p = d.dataset.up, many = d.dataset.mode === 'many';
+  try {
+    for (const f of (many ? list : [list[0]])) {
+      bar.firstElementChild.style.width = 0; const url = await upload1(f, bar);
+      if (p === '__lib') {} else if (many) get(C, p).push(url); else set(C, p, url);
+      files.unshift({ url, size: f.size });
+    }
+    if (p !== '__lib') mark(); toast(p === '__lib' ? 'Файлы загружены' : 'Загружено. Не забудьте нажать «Сохранить на сайте»'); view();
+  } catch (e) { toast(e.message); bar.hidden = true; }
+}
+function act(a, x, y) {
+  const arr = p => get(C, p);
+  if (a === 'rm') { if (!confirm('Удалить?')) return; arr(x).splice(+y, 1); }
+  else if (a === 'mv') { const l = arr(x), i = +y; if (i > 0) [l[i - 1], l[i]] = [l[i], l[i - 1]]; }
+  else if (a === 'addProject') C.projects.push({ id: uid(), title: 'Новый дом', area: 100, floors: 1, bedrooms: 2, material: 'Каркас', price: 'от 0 ₽', desc: '', photos: [] });
+  else if (a === 'addVideo') C.videos[x].push({ id: uid(), title: 'Новое видео', poster: '', src: '', embed: '' });
+  else if (a === 'addCam') C.cameras.push({ id: uid(), title: 'Новая камера', kind: 'iframe', url: '', poster: '' });
+  else if (a === 'addFact') C.about.facts.push({ n: 'Заголовок', t: 'Описание' });
+  else if (a === 'addRow') arr(x).push(y === 'extras' ? { id: uid(), name: 'Новая опция', sum: 0 } : y === 'types' ? { id: uid(), name: 'Новый тип', price: 40000 } : { id: uid(), name: 'Новый вариант', k: 1 });
+  else if (a === 'clear') set(C, x, '');
+  else if (a === 'delLead') { api('/api/leads/' + x, { method: 'DELETE' }).then(() => { leads = leads.filter(l => l.id !== x); view(); }); return; }
+  else if (a === 'delFile') { if (!confirm('Удалить файл с сервера? Если он используется на сайте, картинка пропадёт.')) return; api('/api/uploads/' + x.split('/').pop(), { method: 'DELETE' }).then(() => { files = files.filter(f => f.url !== x); view(); }); return; }
+  else if (a === 'copy') { navigator.clipboard?.writeText(location.origin + x); toast('Ссылка скопирована'); return; }
+  mark(); view();
+}
+
+// ---------- разделы
+function vLeads() {
+  return `<h2>Заявки с сайта</h2><p class="hint">Сюда попадают заявки из формы и калькулятора. В рабочей версии можно подключить пересылку в Telegram или на почту.</p>` +
+    (leads.length ? leads.map(l => `<div class="lead"><b>${esc(l.name || 'Без имени')}</b> · <a href="tel:${esc(l.phone)}">${esc(l.phone)}</a> <small>· ${new Date(l.at).toLocaleString('ru-RU')} · ${esc(l.source)}</small>
+      ${l.comment ? `<div>${esc(l.comment)}</div>` : ''}${l.calc ? `<div><small>${esc(l.calc)}</small></div>` : ''}<button class="btn del sm" data-act="delLead" data-a="${l.id}" style="margin-top:8px">Удалить</button></div>`).join('') : '<div class="card">Заявок пока нет.</div>');
+}
+function vCompany() {
+  const b = C.brand;
+  return `<h2>Компания и главная</h2><p class="hint">Не забудьте нажать «Сохранить на сайте» сверху.</p>
+  <div class="card"><h3>Контакты</h3><div class="grid">${F('Название компании', 'brand.name')}${F('Подпись под названием', 'brand.tagline')}${F('Телефон', 'brand.phone')}${F('Почта', 'brand.email')}${F('Адрес', 'brand.address')}${F('Часы работы', 'brand.hours')}</div></div>
+  <div class="card"><h3>Фирменный стиль</h3><p class="hint">Цвета из бренд-бука подставляются на весь сайт. Логотип показывается в шапке и подвале.</p>
+    <div class="grid">${F('Акцентный цвет (кнопки)', 'brand.colors.accent', { type: 'color' })}${F('Цвет текста', 'brand.colors.ink', { type: 'color' })}${F('Цвет фона', 'brand.colors.canvas', { type: 'color' })}</div>
+    <div class="photos">${b.logo ? `<div class="ph" style="background:#fff">${mediaThumb(b.logo).replace('object-fit', '')}<button data-act="clear" data-a="brand.logo" aria-label="Убрать логотип">×</button></div>` : '<small>Логотип не загружен: в шапке показан значок с первой буквой</small>'}</div>
+    ${Drop('brand.logo', 'one')}</div>
+  <div class="card"><h3>Первый экран</h3><div class="grid">${F('Заголовок', 'hero.title', { full: 1 })}${F('Текст под заголовком', 'hero.text', { type: 'area', full: 1 })}</div>
+    <div class="photos"><div class="ph" style="width:200px;height:112px">${mediaThumb(C.hero.image)}</div></div>${Drop('hero.image', 'one')}</div>
+  <div class="card"><h3>О компании</h3><div class="grid">${F('Заголовок', 'about.title', { full: 1 })}${F('Текст', 'about.text', { type: 'area', full: 1 })}</div>
+    <h3 style="margin-top:18px">Преимущества</h3>${C.about.facts.map((f, i) => `<div class="item"><div class="grid">${F('Заголовок', `about.facts.${i}.n`)}${F('Описание', `about.facts.${i}.t`, { type: 'area' })}</div>
+      <button class="btn del sm" data-act="rm" data-a="about.facts" data-b="${i}" style="margin-top:10px">Удалить</button></div>`).join('')}<button class="btn ghost" data-act="addFact">+ Добавить преимущество</button></div>`;
+}
+function vProjects() {
+  return `<h2>Проекты домов</h2><p class="hint">Фото можно загружать сразу несколько. Первое фото — главное.</p>` + C.projects.map((p, i) => `<div class="item"><div class="item__h"><h3 style="margin:0">${esc(p.title)}</h3><span>
+    <button class="btn ghost sm" data-act="mv" data-a="projects" data-b="${i}"${i ? '' : ' disabled'}>↑ Выше</button> <button class="btn del sm" data-act="rm" data-a="projects" data-b="${i}">Удалить</button></span></div>
+    <div class="grid">${F('Название', `projects.${i}.title`)}${F('Материал', `projects.${i}.material`)}${F('Площадь, м²', `projects.${i}.area`, { type: 'number' })}${F('Этажей', `projects.${i}.floors`, { type: 'number' })}${F('Спален', `projects.${i}.bedrooms`, { type: 'number' })}${F('Цена (текстом)', `projects.${i}.price`)}${F('Описание', `projects.${i}.desc`, { type: 'area', full: 1 })}</div>
+    <div class="photos">${(p.photos || []).map((u, j) => `<div class="ph">${mediaThumb(u)}<button data-act="rm" data-a="projects.${i}.photos" data-b="${j}" aria-label="Убрать фото">×</button>${j ? `<button class="mv" data-act="mv" data-a="projects.${i}.photos" data-b="${j}">←</button>` : ''}</div>`).join('')}</div>
+    ${Drop(`projects.${i}.photos`, 'many')}</div>`).join('') + `<button class="btn" data-act="addProject">+ Добавить проект</button>`;
+}
+function vVideos() {
+  const G = [['projects', 'Видео проектов'], ['reviews', 'Видео отзывы'], ['works', 'Видео работ']];
+  return `<h2>Видео</h2><p class="hint">Два способа: загрузить файл (mp4, до 800 МБ) или вставить ссылку на YouTube / Rutube / VK Видео — так тяжёлые видео не нагружают сайт.</p>` +
+    G.map(([k, t]) => `<div class="card"><h3>${t}</h3>${C.videos[k].map((v, i) => { const p = `videos.${k}.${i}`; return `<div class="item"><div class="item__h"><b>${esc(v.title)}</b><button class="btn del sm" data-act="rm" data-a="videos.${k}" data-b="${i}">Удалить</button></div>
+      <div class="grid">${F('Название', `${p}.title`, { full: 1 })}${F('Ссылка на видео (YouTube, Rutube…)', `${p}.embed`, { full: 1, ph: 'https://www.youtube.com/watch?v=…' })}</div>
+      <p class="hint" style="margin-top:12px">Или файл: ${v.src ? `<b>${esc(v.src.split('/').pop())}</b> <button class="btn ghost sm" data-act="clear" data-a="${p}.src">убрать</button>` : 'не загружен'}</p>${Drop(`${p}.src`, 'one', 'video/*')}
+      <p class="hint" style="margin-top:12px">Обложка:</p><div class="photos">${v.poster ? `<div class="ph">${mediaThumb(v.poster)}<button data-act="clear" data-a="${p}.poster" aria-label="Убрать">×</button></div>` : ''}</div>${Drop(`${p}.poster`, 'one')}</div>`; }).join('')}
+      <button class="btn ghost" data-act="addVideo" data-a="${k}">+ Добавить видео</button></div>`).join('');
+}
+function vCameras() {
+  return `<h2>Камеры на объектах</h2><p class="hint">Тип подключения зависит от камеры. Если не уверены — пришлите модель камеры, мы подберём. Пока стоят демо-картинки.</p>
+  <div class="card"><div class="grid">${F('Текст над камерами', 'camerasNote', { type: 'area', full: 1 })}</div></div>` +
+    C.cameras.map((m, i) => `<div class="item"><div class="item__h"><b>${esc(m.title)}</b><button class="btn del sm" data-act="rm" data-a="cameras" data-b="${i}">Удалить</button></div>
+    <div class="grid">${F('Название', `cameras.${i}.title`)}<label class="f">Тип подключения<select data-p="cameras.${i}.kind">${[['demo', 'Демо-картинка'], ['iframe', 'Встроенный плеер (ссылка-вставка)'], ['hls', 'Видеопоток HLS (.m3u8)'], ['image', 'Кадр с камеры, обновляется раз в 5 сек']].map(([v, t]) => `<option value="${v}"${m.kind === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
+    ${F('Адрес потока или плеера', `cameras.${i}.url`, { full: 1, ph: 'https://…' })}</div>
+    <p class="hint" style="margin-top:12px">Картинка для демо / обложка:</p><div class="photos">${m.poster ? `<div class="ph">${mediaThumb(m.poster)}</div>` : ''}</div>${Drop(`cameras.${i}.poster`, 'one')}</div>`).join('') + `<button class="btn" data-act="addCam">+ Добавить камеру</button>`;
+}
+function vCalc() {
+  const rows = (key, cols) => `<table>${C.calc[key].map((r, i) => `<tr>${cols.map(([f, ph, w, t]) => `<td${w ? ` style="width:${w}"` : ''}><input ${t === 'n' ? 'type="number" step="any"' : ''} data-p="calc.${key}.${i}.${f}" value="${esc(r[f])}" aria-label="${ph}" placeholder="${ph}"></td>`).join('')}<td style="width:44px"><button class="btn del sm" data-act="rm" data-a="calc.${key}" data-b="${i}" aria-label="Удалить">×</button></td></tr>`).join('')}</table><button class="btn ghost sm" data-act="addRow" data-a="calc.${key}" data-b="${key}" style="margin-top:8px">+ Добавить</button>`;
+  return `<h2>Калькулятор</h2><p class="hint">Цены в демо условные. Здесь вы сами задаёте, как считается стоимость на главной странице.</p>
+  <div class="card"><h3>Тип дома и цена за м² (₽)</h3>${rows('types', [['name', 'Название'], ['price', 'Цена за м²', '160px', 'n']])}</div>
+  <div class="card"><h3>Готовность и коэффициент</h3><p class="hint">Коэффициент умножает цену за м²: 1 — под ключ, 0,62 — только коробка.</p>${rows('finish', [['name', 'Название'], ['k', 'Коэффициент', '160px', 'n']])}</div>
+  <div class="card"><h3>Дополнительные опции (₽)</h3>${rows('extras', [['name', 'Название'], ['sum', 'Стоимость', '160px', 'n']])}</div>
+  <div class="card"><h3>Прочее</h3><div class="grid">${F('Коэффициент для 2 этажей (0,94 = на 6% дешевле за м²)', 'calc.floorsDiscount', { type: 'number' })}${F('Пояснение под заголовком', 'calc.note', { type: 'area', full: 1 })}</div></div>`;
+}
+function vFiles() {
+  return `<h2>Файлы</h2><p class="hint">Всё, что вы загрузили. Здесь можно скопировать ссылку или удалить ненужное.</p>
+  <div class="card">${Drop('', 'many', 'image/*,video/*').replace('data-up=""', 'data-up="__lib"')}</div>` +
+    `<div class="card"><div class="photos">${files.length ? files.map(f => `<div style="width:150px"><div class="ph" style="width:150px;height:100px">${mediaThumb(f.url)}</div><small>${(f.size / 1048576).toFixed(1)} МБ</small><br>
+      <button class="btn ghost sm" data-act="copy" data-a="${f.url}">Ссылка</button> <button class="btn del sm" data-act="delFile" data-a="${f.url}">×</button></div>`).join('') : 'Файлов пока нет'}</div></div>`;
+}
+boot();
+</script>
+</body>
+</html>

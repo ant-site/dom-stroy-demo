@@ -1,0 +1,140 @@
+:root{--accent:#b4763a;--accent-ink:#fbf6ef;--ink:#171a1d;--soft:#5d636b;--canvas:#eef0f2;--surface:#fff;--line:#d9dde1;--dark:#1b1f23;--r:6px;--shadow:0 12px 40px rgb(23 26 29/.12);--w:1200px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--canvas);color:var(--ink);font:400 17px/1.6 "IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}a{color:inherit}
+h1,h2,h3{font-family:Geologica,"IBM Plex Sans",sans-serif;line-height:1.12;margin:0;font-weight:700;letter-spacing:-.01em}
+h1{font-size:clamp(30px,5vw,60px)}h2{font-size:clamp(26px,3.6vw,42px)}h3{font-size:21px}
+p{margin:0}
+.wrap{max-width:var(--w);margin:0 auto;padding:0 20px}
+.sec{padding:84px 0}.sec--tight{padding:56px 0}
+.label{font:600 13px/1 "IBM Plex Sans";letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:block}
+.lead{font-size:19px;color:var(--soft);max-width:60ch}
+/* кнопки */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 28px;border:0;border-radius:var(--r);background:var(--accent);color:var(--accent-ink);font:600 16px "IBM Plex Sans";cursor:pointer;text-decoration:none;position:relative;transition:transform .2s,box-shadow .2s,background-color .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgb(0 0 0/.18)}
+.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.btn--pulse::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent);animation:ring 2.8s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}70%,100%{box-shadow:0 0 0 14px transparent}}
+.btn--ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn--ghost:hover{background:var(--ink);color:#fff}
+.btn--sm{min-height:42px;padding:0 18px;font-size:15px}
+/* шапка */
+.bar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--canvas) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:24px;min-height:68px}
+.logo{font:700 22px Geologica,sans-serif;text-decoration:none;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.logo i{width:34px;height:34px;border-radius:6px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-style:normal;font-size:18px}
+.logo img{height:34px;width:auto}
+.nav{display:flex;gap:6px;margin-left:auto}
+.nav a{padding:10px 14px;text-decoration:none;font-weight:500;border-radius:var(--r);transition:background-color .2s}
+.nav a:hover{background:rgb(0 0 0/.06)}.nav a[aria-current=page]{color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent);border-radius:0}
+.bar .tel{font-weight:600;text-decoration:none;white-space:nowrap}
+.burger{display:none;margin-left:auto;background:none;border:0;width:44px;height:44px;cursor:pointer;font-size:26px}
+@media(max-width:860px){.burger{display:block}.bar .tel{display:none}
+ .nav{display:none;position:absolute;left:0;right:0;top:68px;background:var(--canvas);flex-direction:column;padding:12px 20px 20px;border-bottom:1px solid var(--line);margin:0}
+ .nav.open{display:flex}.nav a{padding:14px 8px}}
+/* демо-плашка */
+.demo-for{background:var(--dark);color:#e9e6df;font-size:14px;text-align:center;padding:9px 16px}
+.demo-for b{color:#e8b987;font-weight:600}
+/* hero */
+.hero{position:relative;min-height:calc(100svh - 68px);display:flex;align-items:center;color:#fff;overflow:hidden;isolation:isolate}
+.hero__img{position:absolute;inset:-6% 0;z-index:-2;width:100%;height:112%;object-fit:cover;object-position:62% 50%;will-change:transform}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgb(14 17 20/.82) 0,rgb(14 17 20/.55) 46%,rgb(14 17 20/.05) 80%)}
+.hero .wrap{width:100%;padding-top:60px;padding-bottom:60px}
+.hero h1{max-width:15ch;text-wrap:balance}.hero p{font-size:20px;max-width:46ch;margin:22px 0 32px;color:#e9e6df}
+.hero__row{display:flex;gap:14px;flex-wrap:wrap}
+.hero .btn--ghost{color:#fff;box-shadow:inset 0 0 0 2px rgb(255 255 255/.7)}.hero .btn--ghost:hover{background:#fff;color:var(--ink)}
+@media(max-width:700px){.hero::before{background:linear-gradient(180deg,rgb(14 17 20/.4),rgb(14 17 20/.82))}.hero{align-items:flex-end}.hero__img{object-position:70% 50%}}
+/* факты */
+.facts{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.fact{padding:28px 24px 28px 0;border-right:1px solid var(--line);padding-left:24px}.fact:first-child{padding-left:0}.fact:last-child{border:0}
+.fact b{display:block;font:700 22px Geologica,sans-serif;margin-bottom:8px}.fact span{color:var(--soft);font-size:15.5px}
+@media(max-width:900px){.facts{grid-template-columns:1fr 1fr}.fact{border-right:0;border-bottom:1px solid var(--line);padding-left:0!important}}
+@media(max-width:520px){.facts{grid-template-columns:1fr}}
+.about{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:end;margin-bottom:48px}
+@media(max-width:860px){.about{grid-template-columns:1fr;gap:20px}}
+/* калькулятор */
+.calc{display:grid;grid-template-columns:1.2fr 1fr;gap:0;background:var(--surface);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
+.calc__form{padding:40px}.calc__res{padding:40px;background:var(--dark);color:#fff;display:flex;flex-direction:column;justify-content:center}
+.calc__res small{color:#aab0b6}.calc__sum{font:700 clamp(32px,4vw,48px) Geologica,sans-serif;margin:8px 0 6px;color:#e8b987;letter-spacing:-.02em}
+.calc__list{list-style:none;padding:0;margin:20px 0;font-size:15px;color:#c9ced3}.calc__list li{padding:8px 0;border-bottom:1px solid rgb(255 255 255/.12);display:flex;justify-content:space-between;gap:12px}
+.field{margin-bottom:22px}.field>label,.field>.fl{display:block;font-weight:600;margin-bottom:10px;font-size:15px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:11px 16px;border:2px solid var(--line);border-radius:var(--r);cursor:pointer;font-weight:500;font-size:15px;transition:border-color .2s,background-color .2s}
+.seg input:checked+label{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,#fff);font-weight:600}
+.seg input:focus-visible+label{outline:3px solid var(--ink);outline-offset:2px}
+.range{display:flex;align-items:center;gap:18px}.range input{flex:1;accent-color:var(--accent);height:30px}.range output{font:700 24px Geologica;min-width:92px;text-align:right}
+.chk{display:flex;gap:10px;align-items:center;padding:8px 0;cursor:pointer;font-size:15.5px}.chk input{width:20px;height:20px;accent-color:var(--accent)}
+@media(max-width:900px){.calc{grid-template-columns:1fr}.calc__form,.calc__res{padding:26px 20px}}
+/* форма */
+.formbox{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.form{background:var(--surface);padding:34px;border-radius:10px;box-shadow:var(--shadow)}
+.in{width:100%;padding:14px 16px;border:2px solid var(--line);border-radius:var(--r);font:inherit;background:#fff;color:var(--ink);margin-bottom:14px}
+.in:focus{border-color:var(--accent);outline:0}textarea.in{min-height:96px;resize:vertical}
+.form small{display:block;color:var(--soft);font-size:13px;margin-top:12px}
+.msg{padding:14px 16px;border-radius:var(--r);margin-top:14px;font-weight:500}.msg.ok{background:#e4f1e4;color:#1f4d1f}.msg.err{background:#f8e2e0;color:#7a1f18}
+.contacts{list-style:none;padding:0;margin:28px 0 0}.contacts li{padding:14px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px}
+.contacts li span{color:var(--soft)}
+@media(max-width:860px){.formbox{grid-template-columns:1fr;gap:28px}.form{padding:24px 18px}}
+/* проекты */
+.phead{padding:64px 0 32px}.phead h1{max-width:18ch}.phead p{margin-top:16px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 36px}
+.chip{padding:10px 16px;border:2px solid var(--line);border-radius:100px;background:transparent;font:500 15px "IBM Plex Sans";cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--ink)}.chip[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.proj{display:grid;grid-template-columns:7fr 5fr;gap:0;background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:34px}
+.proj:nth-child(even){grid-template-columns:5fr 7fr}.proj:nth-child(even) .proj__ph{order:2}
+.proj__ph{position:relative;min-height:340px;background:#ccd;cursor:zoom-in;overflow:hidden}
+.proj__ph img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .6s}
+.proj__ph:hover img{transform:scale(1.04)}
+.proj__thumbs{position:absolute;left:12px;bottom:12px;display:flex;gap:6px}
+.proj__thumbs button{width:56px;height:40px;padding:0;border:2px solid #fff;border-radius:4px;overflow:hidden;cursor:pointer;opacity:.85;background:none}
+.proj__thumbs button[aria-current=true]{opacity:1;border-color:var(--accent)}.proj__thumbs img{position:static;width:100%;height:100%}
+.proj__body{padding:36px 36px 32px;display:flex;flex-direction:column}
+.proj__body h2{font-size:30px;margin-bottom:12px}.proj__body p{color:var(--soft)}
+.specs{display:grid;grid-template-columns:repeat(4,auto);gap:10px 22px;margin:22px 0;padding:18px 0;border-block:1px solid var(--line)}
+.specs b{display:block;font:700 22px Geologica}.specs span{font-size:13px;color:var(--soft)}
+.proj__foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.price{font:700 22px Geologica}
+@media(max-width:860px){.proj,.proj:nth-child(even){grid-template-columns:1fr}.proj:nth-child(even) .proj__ph{order:0}.proj__ph{min-height:240px}.proj__body{padding:24px 20px}.specs{grid-template-columns:repeat(2,auto)}}
+.lightbox{position:fixed;inset:0;background:rgb(10 12 14/.92);z-index:100;display:none;place-items:center;padding:20px}
+.lightbox.open{display:grid}.lightbox img{max-height:88vh;max-width:94vw;object-fit:contain;border-radius:4px}
+.lightbox button{position:absolute;background:rgb(255 255 255/.14);color:#fff;border:0;width:52px;height:52px;border-radius:50%;font-size:26px;cursor:pointer}
+.lb-x{top:18px;right:18px}.lb-p{left:18px;top:50%}.lb-n{right:18px;top:50%}
+/* видео */
+.tabs{display:flex;gap:6px;margin-bottom:34px;border-bottom:1px solid var(--line);overflow:auto}
+.tab{padding:14px 20px;border:0;background:none;font:600 16px "IBM Plex Sans";cursor:pointer;color:var(--soft);white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.vcard{background:var(--surface);border-radius:10px;overflow:hidden;box-shadow:0 6px 22px rgb(23 26 29/.09);cursor:pointer;border:0;padding:0;text-align:left;font:inherit;transition:transform .25s}
+.vcard:hover{transform:translateY(-4px)}
+.vcard__ph{position:relative;aspect-ratio:16/10;background:#223}.vcard__ph img{width:100%;height:100%;object-fit:cover}
+.play{position:absolute;inset:0;display:grid;place-items:center}.play i{width:64px;height:64px;border-radius:50%;background:var(--accent);display:grid;place-items:center;box-shadow:0 6px 20px rgb(0 0 0/.35)}
+.play i::after{content:"";border-left:18px solid var(--accent-ink);border-block:11px solid transparent;margin-left:5px}
+.vcard h3{font-size:18px;padding:16px 18px 20px}
+.empty{padding:44px;text-align:center;color:var(--soft);background:var(--surface);border-radius:10px;grid-column:1/-1}
+@media(max-width:900px){.vgrid{grid-template-columns:1fr 1fr}}@media(max-width:560px){.vgrid{grid-template-columns:1fr}}
+.modal{position:fixed;inset:0;z-index:100;background:rgb(10 12 14/.9);display:none;place-items:center;padding:20px}.modal.open{display:grid}
+.modal__box{width:min(960px,100%)}.modal__box video,.modal__box iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px;background:#000}
+.modal__x{position:absolute;top:16px;right:16px;width:52px;height:52px;border:0;border-radius:50%;background:rgb(255 255 255/.14);color:#fff;font-size:26px;cursor:pointer}
+.modal__demo{aspect-ratio:16/9;border-radius:8px;position:relative;overflow:hidden;display:grid;place-items:center;text-align:center;color:#fff;padding:24px}
+.modal__demo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.35)}.modal__demo p{position:relative;max-width:46ch}
+/* камеры */
+.cams{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.cam{background:var(--dark);border-radius:10px;overflow:hidden;color:#fff;box-shadow:var(--shadow)}
+.cam__v{position:relative;aspect-ratio:16/9;overflow:hidden;background:#000}
+.cam__v img,.cam__v video,.cam__v iframe{width:100%;height:100%;object-fit:cover;border:0;display:block}
+.cam__v.demo img{animation:camdrift 28s ease-in-out infinite alternate;transform-origin:50% 50%}
+@keyframes camdrift{from{transform:scale(1.06) translate(-1.5%,0)}to{transform:scale(1.14) translate(1.5%,-1%)}}
+.cam__v.demo::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgb(0 0 0/.07) 0 1px,transparent 1px 3px);pointer-events:none}
+.cam__hud{position:absolute;left:12px;right:12px;top:10px;display:flex;justify-content:space-between;font:600 13px/1 "IBM Plex Sans";text-shadow:0 1px 3px #000;pointer-events:none}
+.rec{display:inline-flex;gap:7px;align-items:center}.rec::before{content:"";width:10px;height:10px;border-radius:50%;background:#e5372b;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.2}}
+.cam__f{padding:16px 20px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.cam__f small{color:#aab0b6}
+@media(max-width:860px){.cams{grid-template-columns:1fr}}
+/* подвал */
+.foot{background:var(--dark);color:#c9ced3;padding:56px 0 30px}
+.foot__top{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;padding-bottom:30px;border-bottom:1px solid rgb(255 255 255/.12)}
+.foot a{text-decoration:none}.foot a:hover{color:#fff}.foot .logo{color:#fff}
+.foot__nav{display:flex;gap:22px;flex-wrap:wrap}.sign{display:flex;align-items:center;gap:12px;padding-top:26px;font-size:15px}
+.sign img{width:44px;height:44px;border-radius:10px;object-fit:cover}
+/* появление */
+[data-in]{opacity:0;transform:translateY(22px);transition:opacity .7s,transform .7s}[data-in].seen{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){[data-in]{opacity:1;transform:none;transition:none}.btn--pulse::after,.rec::before,.cam__v.demo img{animation:none}html{scroll-behavior:auto}}

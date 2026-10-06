@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{brand} – строительство домов по этапам, смета в договоре</title>
+<meta name="description" content="Строительство каркасных, газобетонных и брусовых домов. Расчёт стоимости онлайн, проекты, видео и камеры на объектах.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%23b4763a%27/%3E%3Cpath d=%27M6 17l10-9 10 9v9H6z%27 fill=%27%23fff%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<main>
+  <section class="hero" id="hero">
+    <img class="hero__img" id="heroImg" alt="">
+    <div class="wrap">
+      <h1 id="heroT"></h1><p id="heroP"></p>
+      <div class="hero__row"><a class="btn btn--pulse" href="#raschet">Рассчитать стоимость</a><a class="btn btn--ghost" href="projects.html">Смотреть проекты</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="about"><div class="wrap">
+    <div class="about" data-in><div><span class="label">О компании</span><h2 id="aboutT"></h2></div><p class="lead" id="aboutP"></p></div>
+    <div class="facts" id="facts" data-in></div>
+  </div></section>
+
+  <section class="sec" id="raschet" style="background:#e3e6e9"><div class="wrap">
+    <div data-in style="margin-bottom:34px"><span class="label">Калькулятор</span><h2>Сколько стоит ваш дом</h2><p class="lead" id="calcNote" style="margin-top:12px"></p></div>
+    <div class="calc" data-in>
+      <div class="calc__form">
+        <div class="field"><span class="fl">Материал стен</span><div class="seg" id="cType"></div></div>
+        <div class="field"><label for="cArea">Площадь дома</label><div class="range"><input id="cArea" type="range" min="40" max="300" step="5" value="120"><output id="cAreaO" for="cArea">120 м²</output></div></div>
+        <div class="field"><span class="fl">Этажность</span><div class="seg" id="cFloors">
+          <input type="radio" name="fl" id="f1" value="1" checked><label for="f1">1 этаж</label><input type="radio" name="fl" id="f2" value="2"><label for="f2">2 этажа</label></div></div>
+        <div class="field"><span class="fl">Готовность</span><div class="seg" id="cFinish"></div></div>
+        <div class="field" style="margin:0"><span class="fl">Дополнительно</span><div id="cExtras"></div></div>
+      </div>
+      <div class="calc__res">
+        <small>Ориентировочная стоимость</small>
+        <div class="calc__sum" id="cSum" aria-live="polite">—</div>
+        <small id="cM2"></small>
+        <ul class="calc__list" id="cList"></ul>
+        <a class="btn" href="#zayavka" id="cGo">Получить точную смету</a>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="sec" id="zayavka"><div class="wrap formbox">
+    <div data-in><span class="label">Связаться</span><h2>Оставьте заявку — перезвоним и ответим на вопросы</h2>
+      <p class="lead" style="margin-top:16px">Расчёт из калькулятора приложится к заявке автоматически. Выезд на участок и точная смета — после звонка.</p>
+      <ul class="contacts" id="contacts"></ul></div>
+    <form class="form" id="lead" data-in novalidate>
+      <input class="in" name="name" placeholder="Ваше имя" autocomplete="name" aria-label="Имя">
+      <input class="in" name="phone" type="tel" placeholder="Телефон" autocomplete="tel" required aria-label="Телефон">
+      <textarea class="in" name="comment" placeholder="Комментарий: участок, пожелания" aria-label="Комментарий"></textarea>
+      <button class="btn" type="submit" style="width:100%">Отправить заявку</button>
+      <div class="msg-slot"></div>
+      <small>Нажимая кнопку, вы соглашаетесь на обработку персональных данных (здесь будет ссылка на политику).</small>
+    </form>
+  </div></section>
+</main>
+<script src="api-shim.js"></script><script src="site.js"></script>
+<script>
+SITE.ready.then(c => {
+  const $ = id => document.getElementById(id);
+  $('heroImg').src = c.hero.image; $('heroT').textContent = c.hero.title; $('heroP').textContent = c.hero.text;
+  $('aboutT').textContent = c.about.title; $('aboutP').textContent = c.about.text;
+  $('facts').innerHTML = c.about.facts.map(f => `<div class="fact"><b>${esc(f.n)}</b><span>${esc(f.t)}</span></div>`).join('');
+  const b = c.brand;
+  $('contacts').innerHTML = [['Телефон', `<a href="${telHref(b.phone)}">${esc(b.phone)}</a>`], ['Почта', esc(b.email)], ['Адрес', esc(b.address)], ['Часы', esc(b.hours)]]
+    .map(([k, v]) => `<li><span>${k}</span><b>${v}</b></li>`).join('');
+  // параллакс героя
+  const hi = $('heroImg'); if (!matchMedia('(prefers-reduced-motion:reduce)').matches)
+    addEventListener('scroll', () => { const y = scrollY; if (y < innerHeight) hi.style.transform = `translateY(${y * .18}px)`; }, { passive: true });
+
+  // калькулятор
+  const k = c.calc, st = { type: k.types[0].id, finish: k.finish[k.finish.length - 1].id };
+  $('calcNote').textContent = k.note;
+  const radios = (host, name, items, key) => { $(host).innerHTML = items.map((t, i) => `<input type="radio" name="${name}" id="${name}${i}" value="${t.id}"${t.id === st[key] ? ' checked' : ''}><label for="${name}${i}">${esc(t.name)}</label>`).join(''); };
+  radios('cType', 'ty', k.types, 'type'); radios('cFinish', 'fi', k.finish, 'finish');
+  $('cExtras').innerHTML = k.extras.map(e => `<label class="chk"><input type="checkbox" value="${e.id}"> ${esc(e.name)} <small style="margin-left:auto;color:var(--soft)">+${fmt(e.sum)} ₽</small></label>`).join('');
+  let summary = '';
+  const calc = () => {
+    const area = +$('cArea').value, floors = +document.querySelector('[name=fl]:checked').value;
+    const ty = k.types.find(t => t.id === document.querySelector('[name=ty]:checked').value);
+    const fi = k.finish.find(t => t.id === document.querySelector('[name=fi]:checked').value);
+    const per = ty.price * fi.k * (floors === 2 ? k.floorsDiscount : 1);
+    const ex = [...document.querySelectorAll('#cExtras input:checked')].map(i => k.extras.find(e => e.id === i.value));
+    const base = per * area, total = base + ex.reduce((s, e) => s + e.sum, 0);
+    const lo = Math.round(total * .93 / 10000) * 10000, hi2 = Math.round(total * 1.07 / 10000) * 10000;
+    $('cAreaO').textContent = area + ' м²';
+    $('cSum').textContent = `${fmt(lo)} – ${fmt(hi2)} ₽`;
+    $('cM2').textContent = `около ${fmt(per)} ₽ за м²`;
+    $('cList').innerHTML = `<li><span>${esc(ty.name)}, ${area} м², ${floors} эт.</span><span>${fmt(base)} ₽</span></li>` +
+      `<li><span>${esc(fi.name)}</span><span>×${fi.k}</span></li>` + ex.map(e => `<li><span>${esc(e.name)}</span><span>${fmt(e.sum)} ₽</span></li>`).join('');
+    summary = `Расчёт: ${ty.name}, ${area} м², ${floors} эт., ${fi.name}${ex.length ? ', ' + ex.map(e => e.name).join(', ') : ''} — ${fmt(lo)}–${fmt(hi2)} ₽`;
+  };
+  document.querySelector('.calc').addEventListener('input', calc); calc();
+  SITE.bindLead($('lead'), 'index', () => summary);
+  $('cGo').addEventListener('click', () => { const t = document.querySelector('#lead [name=comment]'); if (!t.value) t.value = summary; });
+});
+</script>
+</body>
+</html>

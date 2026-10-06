@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Видео и камеры на объектах – {brand}</title>
+<meta name="description" content="Видео проектов, отзывы заказчиков, видео работ и камеры онлайн на строящихся объектах.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%23b4763a%27/%3E%3Cpath d=%27M6 17l10-9 10 9v9H6z%27 fill=%27%23fff%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<main>
+  <div class="wrap"><div class="phead" data-in><span class="label">Видео</span><h1>Видео и камеры на объектах</h1><p class="lead">Смотрите проекты, отзывы заказчиков и ход работ. А ещё — стройка онлайн.</p></div></div>
+  <section class="wrap" style="padding-bottom:70px">
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="vgrid" id="vgrid" role="tabpanel"></div>
+  </section>
+  <section class="sec" id="cams" style="background:#e3e6e9"><div class="wrap">
+    <div data-in style="margin-bottom:34px"><span class="label">Онлайн</span><h2>Камеры на объектах</h2><p class="lead" id="camNote" style="margin-top:12px"></p></div>
+    <div class="cams" id="camGrid"></div>
+  </div></section>
+</main>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Видео"><button class="modal__x" aria-label="Закрыть">×</button><div class="modal__box" id="mbox"></div></div>
+<script src="api-shim.js"></script><script src="site.js"></script>
+<script>
+SITE.ready.then(c => {
+  const groups = [['projects', 'Видео проектов'], ['reviews', 'Видео отзывы'], ['works', 'Видео работ']];
+  const tabs = document.getElementById('tabs'), grid = document.getElementById('vgrid'), modal = document.getElementById('modal'), mbox = document.getElementById('mbox');
+  let cur = 'projects';
+  const embedUrl = u => {
+    let m;
+    if ((m = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{6,})/.exec(u))) return 'https://www.youtube.com/embed/' + m[1] + '?autoplay=1';
+    if ((m = /rutube\.ru\/video\/([a-f0-9]+)/.exec(u))) return 'https://rutube.ru/play/embed/' + m[1];
+    return u;
+  };
+  tabs.innerHTML = groups.map(([k, t]) => `<button class="tab" role="tab" data-k="${k}" aria-selected="${k === cur}">${t} <small>(${(c.videos[k] || []).length})</small></button>`).join('');
+  tabs.onclick = e => { const b = e.target.closest('.tab'); if (!b) return; cur = b.dataset.k; tabs.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === b)); draw(); };
+  function draw() {
+    const vs = c.videos[cur] || [];
+    grid.innerHTML = vs.length ? vs.map((v, i) => `<button class="vcard" data-i="${i}"><div class="vcard__ph">${v.poster ? `<img src="${esc(v.poster)}" alt="" loading="lazy">` : ''}<div class="play"><i></i></div></div><h3>${esc(v.title)}</h3></button>`).join('')
+      : '<p class="empty">Видео в этом разделе скоро появятся.</p>';
+  }
+  draw();
+  grid.onclick = e => {
+    const b = e.target.closest('.vcard'); if (!b) return; const v = c.videos[cur][+b.dataset.i];
+    if (v.src) mbox.innerHTML = `<video src="${esc(v.src)}" poster="${esc(v.poster || '')}" controls autoplay playsinline></video>`;
+    else if (v.embed) mbox.innerHTML = `<iframe src="${esc(embedUrl(v.embed))}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="${esc(v.title)}"></iframe>`;
+    else mbox.innerHTML = `<div class="modal__demo">${v.poster ? `<img src="${esc(v.poster)}" alt="">` : ''}<p><b>Демо-карточка</b><br>Здесь будет видео «${esc(v.title)}». Загрузите файл или вставьте ссылку на YouTube / Rutube в админ-панели — оно появится на этом месте.</p></div>`;
+    modal.classList.add('open'); modal.querySelector('.modal__x').focus();
+  };
+  const close = () => { modal.classList.remove('open'); mbox.innerHTML = ''; };
+  modal.querySelector('.modal__x').onclick = close; modal.onclick = e => { if (e.target === modal) close(); };
+  addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) close(); });
+
+  // камеры
+  document.getElementById('camNote').textContent = c.camerasNote || '';
+  const camGrid = document.getElementById('camGrid'), timers = [];
+  camGrid.innerHTML = (c.cameras || []).map((m, i) => {
+    let inner;
+    if (m.kind === 'iframe') inner = `<iframe src="${esc(m.url)}" allow="autoplay; fullscreen" allowfullscreen title="${esc(m.title)}"></iframe>`;
+    else if (m.kind === 'hls') inner = `<video muted autoplay playsinline controls data-hls="${esc(m.url)}" poster="${esc(m.poster || '')}"></video>`;
+    else if (m.kind === 'image') inner = `<img data-snap="${esc(m.url)}" src="${esc(m.url)}" alt="${esc(m.title)}">`;
+    else inner = `<img src="${esc(m.poster)}" alt="${esc(m.title)}">`;
+    return `<article class="cam" data-in><div class="cam__v ${m.kind === 'demo' || !m.kind ? 'demo' : ''}">${inner}
+      <div class="cam__hud"><span class="rec">LIVE</span><span class="clk">--:--:--</span></div></div>
+      <div class="cam__f"><b>${esc(m.title)}</b><small>${m.kind === 'demo' || !m.kind ? 'Демо-картинка: подключите свою камеру в админ-панели' : 'Прямая трансляция'}</small></div></article>`;
+  }).join('') || '<p class="empty">Камеры пока не подключены.</p>';
+  SITE.reveal(camGrid);
+  const tick = () => document.querySelectorAll('.clk').forEach(el => el.textContent = new Date().toLocaleString('ru-RU'));
+  tick(); setInterval(tick, 1000);
+  document.querySelectorAll('[data-snap]').forEach(img => setInterval(() => { const u = img.dataset.snap; img.src = u + (u.includes('?') ? '&' : '?') + 't=' + Date.now(); }, 5000));
+  const hl = document.querySelectorAll('video[data-hls]');
+  if (hl.length) { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1';
+    s.onload = () => hl.forEach(v => { const u = v.dataset.hls; if (v.canPlayType('application/vnd.apple.mpegurl')) v.src = u; else if (window.Hls && Hls.isSupported()) { const h = new Hls(); h.loadSource(u); h.attachMedia(v); } });
+    document.head.appendChild(s); }
+});
+</script>
+</body>
+</html>
